@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false" scanPeriod="60 seconds" debug="false">
+
+    <!--<include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+    <!--<include resource="org/springframework/boot/logging/logback/base.xml"/>-->
+
+    <property name="log_pattern" value="%d{MM-dd HH:mm:ss} %logger{36} - %msg%n%ex"/>
+    <property name="log_dir" value="/data/logs/springbootdemo/"/>
+    <property name="log_history" value="960"/>
+    <property name="log_error_history" value="960"/>
+    <property name="all_log_history" value="48"/>
+    <property name="async_queue_size" value="50000"/>
+
+    <appender name="all" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}all.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}all.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>${all_log_history}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="async-all" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 全部日志  用ThresholdFilter 过滤器,打印INFO级别以上的log -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <appender-ref ref="all"/>
+        <queueSize>${async_queue_size}</queueSize>
+        <!-- 异步队列超过设置大于0的阈值，就丢弃TRACE, DEBUG ,INFO 基本log；为0不丢弃 可能产生阻塞队列的put方法-->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 当队列满的时候，当前线程不会阻塞，调用阻塞队列的offer-->
+        <neverBlock>true</neverBlock>
+    </appender>
+
+
+    <appender name="dao-info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}dao-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}dao-info.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+            <maxHistory>${log_history}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!--异步方式打印log-->
+    <appender name="async-dao-info" class="ch.qos.logback.classic.AsyncAppender">
+        <!--info级别 采用LevelFilter过滤器，只打印INFO级别的log,过滤掉其他级别的任何log-->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <appender-ref ref="dao-info"/>
+
+        <queueSize>${async_queue_size}</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+
+    <!--error 级别-->
+    <appender name="dao-error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}dao-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}dao-error.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>${log_error_history}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="async-dao-error" class="ch.qos.logback.classic.AsyncAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <appender-ref ref="dao-error"/>
+        <queueSize>${async_queue_size}</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+
+    <appender name="monitor" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}monitor.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}monitor.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>${all_log_history}</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="async-monitor" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 全部日志  用ThresholdFilter 过滤器,打印INFO级别以上的log -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <appender-ref ref="monitor"/>
+        <queueSize>${async_queue_size}</queueSize>
+        <!-- 异步队列超过设置大于0的阈值，就丢弃TRACE, DEBUG ,INFO 基本log；为0不丢弃 可能产生阻塞队列的put方法-->
+        <discardingThreshold>2000</discardingThreshold>
+        <!-- 当队列满的时候，当前线程不会阻塞，调用阻塞队列的offer-->
+        <neverBlock>true</neverBlock>
+    </appender>
+
+
+    <logger name="dao" additivity="false">
+        <appender-ref ref="async-dao-info"/>
+        <appender-ref ref="async-dao-error"/>
+    </logger>
+
+    <logger name="monitor" additivity="false">
+        <appender-ref ref="async-monitor"/>
+    </logger>
+
+
+    <!-- console output -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4relative [${port}] [%thread] %-3level %logger{26} %marker %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <root level="debug">
+        <appender-ref ref="async-all"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+
+</configuration>
