@@ -1,11 +1,8 @@
 package com.wangjinzhao.springbootdemo.persistence.service;
 
-import com.wangjinzhao.springbootdemo.persistence.dao.UserRepository;
 import com.wangjinzhao.springbootdemo.persistence.domain.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
@@ -22,6 +19,11 @@ public interface UserService {
 
     Page<User> listDeletedByPage(int pageNumber, int pageSize, boolean deleted);
 
-    User findOneByUserNameAndAK(String userName,String ak);
+    Page<User> listComplexByPage(String accesskey, String accesskeySecret, String userName, int pageNum, int pageSize);
+
+    //Page<User> listExampleByPage(String accesskey, String accesskeySecret, String userName, int pageNum, int pageSize);
+
+    User findOneByUserNameAndAK(String userName, String ak);
+
 
 }

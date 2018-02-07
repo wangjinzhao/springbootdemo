@@ -150,4 +150,41 @@ public class UserController {
         return commonResponse;
     }
 
+
+    @RequestMapping(value = "/listComplexByPage", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    CommonResponse<User> listComplexByPage(@RequestParam("userName") String userName,
+                                           @RequestParam("accesskey") String accesskey,
+                                           @RequestParam("accesskeySecret") String accesskeySecret,
+                                           @RequestParam("pageNumber") int pageNumber,
+                                           @RequestParam("pageSize") int pageSize) {
+        CommonResponse commonResponse = ResponseUtil.createCommonResponse(ResponseUtil.APIResponseEnum.OK);
+        try {
+            Page<User> result = userService.listComplexByPage(accesskey, accesskeySecret, userName, pageNumber, pageSize);
+            commonResponse.setResult(result);
+        } catch (Exception e) {
+            commonResponse = ResponseUtil.createCommonResponse(ResponseUtil.APIResponseEnum.InternalError);
+        }
+        return commonResponse;
+    }
+
+//    @RequestMapping(value = "/listExampleByPage", method = RequestMethod.GET)
+//    public
+//    @ResponseBody
+//    CommonResponse<User> listExampleByPage(@RequestParam("userName") String userName,
+//                                           @RequestParam("accesskey") String accesskey,
+//                                           @RequestParam("accesskeySecret") String accesskeySecret,
+//                                           @RequestParam("pageNumber") int pageNumber,
+//                                           @RequestParam("pageSize") int pageSize) {
+//        CommonResponse commonResponse = ResponseUtil.createCommonResponse(ResponseUtil.APIResponseEnum.OK);
+//        try {
+//            Page<User> result = userService.listExampleByPage(accesskey, accesskeySecret, userName, pageNumber, pageSize);
+//            commonResponse.setResult(result);
+//        } catch (Exception e) {
+//            commonResponse = ResponseUtil.createCommonResponse(ResponseUtil.APIResponseEnum.InternalError);
+//        }
+//        return commonResponse;
+//    }
+
 }
